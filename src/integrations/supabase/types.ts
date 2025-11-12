@@ -17,31 +17,40 @@ export type Database = {
       daily_records: {
         Row: {
           added_stock: number
+          amount_sold: number
+          closing_stock: number
           created_at: string
           date: string
           id: string
           opening_stock: number
           product_id: string
+          profit: number
           sold_stock: number
           updated_at: string
         }
         Insert: {
           added_stock?: number
+          amount_sold: number
+          closing_stock: number
           created_at?: string
           date: string
           id?: string
           opening_stock?: number
           product_id: string
+          profit: number
           sold_stock?: number
           updated_at?: string
         }
         Update: {
           added_stock?: number
+          amount_sold?: number
+          closing_stock?: number
           created_at?: string
           date?: string
           id?: string
           opening_stock?: number
           product_id?: string
+          profit?: number
           sold_stock?: number
           updated_at?: string
         }
@@ -90,7 +99,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_previous_closing_stock: {
+        Args: { p_date: string; p_product_id: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

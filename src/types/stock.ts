@@ -15,6 +15,9 @@ export interface DailyRecord {
   opening_stock: number;
   added_stock: number;
   sold_stock: number;
+  closing_stock: number;
+  amount_sold: number;
+  profit: number;
   created_at: string;
   updated_at: string;
 }

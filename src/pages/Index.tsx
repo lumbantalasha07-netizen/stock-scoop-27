@@ -5,6 +5,7 @@ import { StatsCard } from "@/components/StatsCard";
 import { DailyRecordTable } from "@/components/DailyRecordTable";
 import { AddRecordDialog } from "@/components/AddRecordDialog";
 import { ProductsManager } from "@/components/ProductsManager";
+import { ProfitChart } from "@/components/ProfitChart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -126,11 +127,8 @@ const Index = () => {
     let totalAdded = 0;
 
     records.forEach((record) => {
-      const amountSold = record.sold_stock * record.products.selling_price;
-      const profit = record.sold_stock * (record.products.selling_price - record.products.cost_price);
-      
-      totalSales += amountSold;
-      totalProfit += profit;
+      totalSales += Number(record.amount_sold);
+      totalProfit += Number(record.profit);
       totalAdded += record.added_stock;
     });
 
@@ -143,9 +141,6 @@ const Index = () => {
     const headers = ["Item Name", "Category", "Opening Stock", "Added Stock", "Total Stock", "Sold Stock", "Amount Sold", "Closing Stock", "Profit"];
     const rows = records.map(record => {
       const totalStock = record.opening_stock + record.added_stock;
-      const closingStock = totalStock - record.sold_stock;
-      const amountSold = record.sold_stock * record.products.selling_price;
-      const profit = record.sold_stock * (record.products.selling_price - record.products.cost_price);
       
       return [
         record.products.name,
@@ -154,9 +149,9 @@ const Index = () => {
         record.added_stock,
         totalStock,
         record.sold_stock,
-        amountSold.toFixed(2),
-        closingStock,
-        profit.toFixed(2)
+        Number(record.amount_sold).toFixed(2),
+        record.closing_stock,
+        Number(record.profit).toFixed(2)
       ];
     });
 
@@ -251,6 +246,9 @@ const Index = () => {
                 />
               </div>
             </div>
+
+            {/* Profit Chart */}
+            <ProfitChart records={records} />
 
             {loading ? (
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
