@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Product, DailyRecordWithProduct } from "@/types/stock";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import type { Product, DailyRecordWithProduct, InsertProduct, InsertDailyRecord } from "@shared/schema";
 import { StatsCard } from "@/components/StatsCard";
 import { DailyRecordTable } from "@/components/DailyRecordTable";
 import { AddRecordDialog } from "@/components/AddRecordDialog";
@@ -11,115 +11,88 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DollarSign, TrendingUp, Package, Calendar, Download } from "lucide-react";
 import { toast } from "sonner";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 
 const Index = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [records, setRecords] = useState<DailyRecordWithProduct[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchProducts();
-    fetchRecords(selectedDate);
-  }, [selectedDate]);
+  const { data: products = [] } = useQuery<Product[]>({
+    queryKey: ["/api/products"],
+  });
 
-  const fetchProducts = async () => {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("category", { ascending: true })
-      .order("name", { ascending: true });
+  const { data: records = [], isLoading } = useQuery<DailyRecordWithProduct[]>({
+    queryKey: ["/api/daily-records", selectedDate],
+    queryFn: async () => {
+      const res = await fetch(`/api/daily-records?date=${selectedDate}`);
+      if (!res.ok) throw new Error("Failed to fetch records");
+      return res.json();
+    },
+  });
 
-    if (error) {
-      toast.error("Failed to fetch products");
-      console.error(error);
-    } else {
-      setProducts(data || []);
-    }
-  };
-
-  const fetchRecords = async (date: string) => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("daily_records")
-      .select("*, products(*)")
-      .eq("date", date);
-
-    if (error) {
-      toast.error("Failed to fetch records");
-      console.error(error);
-    } else {
-      setRecords(data || []);
-    }
-    setLoading(false);
-  };
-
-  const handleAddRecord = async (record: any) => {
-    const { error } = await supabase.from("daily_records").insert(record);
-
-    if (error) {
-      if (error.code === "23505") {
+  const addRecordMutation = useMutation({
+    mutationFn: (record: InsertDailyRecord) =>
+      apiRequest("/api/daily-records", "POST", record),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/daily-records"] });
+      toast.success("Record added successfully");
+    },
+    onError: (error: Error) => {
+      if (error.message.includes("409")) {
         toast.error("Record already exists for this product and date");
       } else {
         toast.error("Failed to add record");
       }
-      console.error(error);
-    } else {
-      toast.success("Record added successfully");
-      fetchRecords(selectedDate);
-    }
-  };
+    },
+  });
 
-  const handleDeleteRecord = async (id: string) => {
-    const { error } = await supabase.from("daily_records").delete().eq("id", id);
-
-    if (error) {
-      toast.error("Failed to delete record");
-      console.error(error);
-    } else {
+  const deleteRecordMutation = useMutation({
+    mutationFn: (id: string) => apiRequest(`/api/daily-records/${id}`, "DELETE"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/daily-records"] });
       toast.success("Record deleted successfully");
-      fetchRecords(selectedDate);
-    }
-  };
+    },
+    onError: () => {
+      toast.error("Failed to delete record");
+    },
+  });
 
-  const handleAddProduct = async (product: Omit<Product, "id" | "created_at" | "updated_at">) => {
-    const { error } = await supabase.from("products").insert(product);
-
-    if (error) {
-      toast.error("Failed to add product");
-      console.error(error);
-    } else {
+  const addProductMutation = useMutation({
+    mutationFn: (product: InsertProduct) =>
+      apiRequest("/api/products", "POST", product),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       toast.success("Product added successfully");
-      fetchProducts();
-    }
-  };
+    },
+    onError: () => {
+      toast.error("Failed to add product");
+    },
+  });
 
-  const handleUpdateProduct = async (id: string, updates: Partial<Product>) => {
-    const { error } = await supabase.from("products").update(updates).eq("id", id);
-
-    if (error) {
-      toast.error("Failed to update product");
-      console.error(error);
-    } else {
+  const updateProductMutation = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<InsertProduct> }) =>
+      apiRequest(`/api/products/${id}`, "PATCH", updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/daily-records"] });
       toast.success("Product updated successfully");
-      fetchProducts();
-      fetchRecords(selectedDate);
-    }
-  };
+    },
+    onError: () => {
+      toast.error("Failed to update product");
+    },
+  });
 
-  const handleDeleteProduct = async (id: string) => {
-    const { error } = await supabase.from("products").delete().eq("id", id);
-
-    if (error) {
-      toast.error("Failed to delete product");
-      console.error(error);
-    } else {
+  const deleteProductMutation = useMutation({
+    mutationFn: (id: string) => apiRequest(`/api/products/${id}`, "DELETE"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       toast.success("Product deleted successfully");
-      fetchProducts();
-    }
-  };
+    },
+    onError: () => {
+      toast.error("Failed to delete product");
+    },
+  });
 
   const calculateDailySummary = () => {
     let totalSales = 0;
@@ -127,9 +100,9 @@ const Index = () => {
     let totalAdded = 0;
 
     records.forEach((record) => {
-      totalSales += Number(record.amount_sold);
+      totalSales += Number(record.amountSold);
       totalProfit += Number(record.profit);
-      totalAdded += record.added_stock;
+      totalAdded += record.addedStock;
     });
 
     return { totalSales, totalProfit, totalAdded };
@@ -140,17 +113,17 @@ const Index = () => {
   const exportToCSV = () => {
     const headers = ["Item Name", "Category", "Opening Stock", "Added Stock", "Total Stock", "Sold Stock", "Amount Sold", "Closing Stock", "Profit"];
     const rows = records.map(record => {
-      const totalStock = record.opening_stock + record.added_stock;
+      const totalStock = record.openingStock + record.addedStock;
       
       return [
-        record.products.name,
-        record.products.category,
-        record.opening_stock,
-        record.added_stock,
+        record.product.name,
+        record.product.category,
+        record.openingStock,
+        record.addedStock,
         totalStock,
-        record.sold_stock,
-        Number(record.amount_sold).toFixed(2),
-        record.closing_stock,
+        record.soldStock,
+        Number(record.amountSold).toFixed(2),
+        record.closingStock,
         Number(record.profit).toFixed(2)
       ];
     });
@@ -171,12 +144,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="bg-card border-b border-border shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground" data-testid="text-dashboard-title">
                 Restaurant Daily Stock Dashboard
               </h1>
               <p className="text-muted-foreground mt-1">Track your inventory and profits</p>
@@ -188,15 +160,14 @@ const Index = () => {
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
                 className="w-auto"
+                data-testid="input-date-selector"
               />
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-6 space-y-6">
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StatsCard
             title="Total Sales"
@@ -218,11 +189,10 @@ const Index = () => {
           />
         </div>
 
-        {/* Tabs */}
         <Tabs defaultValue="daily" className="space-y-4">
           <TabsList className="bg-card">
-            <TabsTrigger value="daily">Daily Records</TabsTrigger>
-            <TabsTrigger value="products">Products</TabsTrigger>
+            <TabsTrigger value="daily" data-testid="tab-daily-records">Daily Records</TabsTrigger>
+            <TabsTrigger value="products" data-testid="tab-products">Products</TabsTrigger>
           </TabsList>
 
           <TabsContent value="daily" className="space-y-4">
@@ -235,6 +205,7 @@ const Index = () => {
                   variant="outline"
                   onClick={exportToCSV}
                   disabled={records.length === 0}
+                  data-testid="button-export-csv"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Export CSV
@@ -242,27 +213,29 @@ const Index = () => {
                 <AddRecordDialog
                   products={products}
                   selectedDate={selectedDate}
-                  onAdd={handleAddRecord}
+                  onAdd={(record) => addRecordMutation.mutate(record)}
                 />
               </div>
             </div>
 
-            {/* Profit Chart */}
             <ProfitChart records={records} />
 
-            {loading ? (
+            {isLoading ? (
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
-              <DailyRecordTable records={records} onDelete={handleDeleteRecord} />
+              <DailyRecordTable 
+                records={records} 
+                onDelete={(id) => deleteRecordMutation.mutate(id)} 
+              />
             )}
           </TabsContent>
 
           <TabsContent value="products">
             <ProductsManager
               products={products}
-              onAdd={handleAddProduct}
-              onUpdate={handleUpdateProduct}
-              onDelete={handleDeleteProduct}
+              onAdd={(product) => addProductMutation.mutate(product)}
+              onUpdate={(id, updates) => updateProductMutation.mutate({ id, updates })}
+              onDelete={(id) => deleteProductMutation.mutate(id)}
             />
           </TabsContent>
         </Tabs>

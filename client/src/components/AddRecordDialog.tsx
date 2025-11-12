@@ -17,64 +17,50 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Product } from "@/types/stock";
+import type { Product, InsertDailyRecord } from "@shared/schema";
 import { Plus } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface AddRecordDialogProps {
   products: Product[];
   selectedDate: string;
-  onAdd: (record: {
-    product_id: string;
-    date: string;
-    opening_stock: number;
-    added_stock: number;
-    sold_stock: number;
-  }) => void;
+  onAdd: (record: InsertDailyRecord) => void;
 }
 
 export const AddRecordDialog = ({ products, selectedDate, onAdd }: AddRecordDialogProps) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    product_id: "",
-    opening_stock: 0,
-    added_stock: 0,
-    sold_stock: 0,
+    productId: "",
+    openingStock: 0,
+    addedStock: 0,
+    soldStock: 0,
   });
   const [loadingPrevious, setLoadingPrevious] = useState(false);
   const [autoFilled, setAutoFilled] = useState(false);
 
-  // Fetch previous day's closing stock when product changes
   useEffect(() => {
-    if (!formData.product_id || !open) return;
+    if (!formData.productId || !open) return;
 
     const fetchPreviousClosing = async () => {
       setLoadingPrevious(true);
       setAutoFilled(false);
 
       try {
-        // Get the date before selectedDate
         const currentDate = new Date(selectedDate);
         currentDate.setDate(currentDate.getDate() - 1);
         const previousDate = currentDate.toISOString().split("T")[0];
 
-        // Fetch yesterday's record for this product
-        const { data, error } = await supabase
-          .from("daily_records")
-          .select("closing_stock")
-          .eq("product_id", formData.product_id)
-          .eq("date", previousDate)
-          .maybeSingle();
-
-        if (error) throw error;
-
-        if (data) {
-          setFormData(prev => ({ ...prev, opening_stock: data.closing_stock }));
+        const res = await fetch(`/api/daily-records/previous-stock/${formData.productId}?date=${selectedDate}`);
+        if (!res.ok) throw new Error("Failed to fetch");
+        
+        const { closingStock } = await res.json();
+        
+        if (closingStock > 0) {
+          setFormData(prev => ({ ...prev, openingStock: closingStock }));
           setAutoFilled(true);
-          toast.success(`Opening stock auto-filled from previous day: ${data.closing_stock}`);
+          toast.success(`Opening stock auto-filled from previous day: ${closingStock}`);
         } else {
-          setFormData(prev => ({ ...prev, opening_stock: 0 }));
+          setFormData(prev => ({ ...prev, openingStock: 0 }));
         }
       } catch (error) {
         console.error("Error fetching previous closing:", error);
@@ -84,22 +70,25 @@ export const AddRecordDialog = ({ products, selectedDate, onAdd }: AddRecordDial
     };
 
     fetchPreviousClosing();
-  }, [formData.product_id, selectedDate, open]);
+  }, [formData.productId, selectedDate, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.product_id) return;
+    if (!formData.productId) return;
 
     onAdd({
-      ...formData,
+      productId: formData.productId,
       date: selectedDate,
+      openingStock: formData.openingStock,
+      addedStock: formData.addedStock,
+      soldStock: formData.soldStock,
     });
     
     setFormData({
-      product_id: "",
-      opening_stock: 0,
-      added_stock: 0,
-      sold_stock: 0,
+      productId: "",
+      openingStock: 0,
+      addedStock: 0,
+      soldStock: 0,
     });
     setAutoFilled(false);
     setOpen(false);
@@ -124,10 +113,10 @@ export const AddRecordDialog = ({ products, selectedDate, onAdd }: AddRecordDial
           <div className="space-y-2">
             <Label htmlFor="product">Product</Label>
             <Select
-              value={formData.product_id}
-              onValueChange={(value) => setFormData({ ...formData, product_id: value })}
+              value={formData.productId}
+              onValueChange={(value) => setFormData({ ...formData, productId: value })}
             >
-              <SelectTrigger id="product">
+              <SelectTrigger id="product" data-testid="select-product">
                 <SelectValue placeholder="Select a product" />
               </SelectTrigger>
               <SelectContent>
@@ -152,13 +141,14 @@ export const AddRecordDialog = ({ products, selectedDate, onAdd }: AddRecordDial
                 id="opening"
                 type="number"
                 min="0"
-                value={formData.opening_stock}
+                value={formData.openingStock}
                 onChange={(e) => {
-                  setFormData({ ...formData, opening_stock: parseInt(e.target.value) || 0 });
+                  setFormData({ ...formData, openingStock: parseInt(e.target.value) || 0 });
                   setAutoFilled(false);
                 }}
                 disabled={loadingPrevious}
                 className={autoFilled ? "border-success" : ""}
+                data-testid="input-opening-stock"
               />
             </div>
 
@@ -168,8 +158,9 @@ export const AddRecordDialog = ({ products, selectedDate, onAdd }: AddRecordDial
                 id="added"
                 type="number"
                 min="0"
-                value={formData.added_stock}
-                onChange={(e) => setFormData({ ...formData, added_stock: parseInt(e.target.value) || 0 })}
+                value={formData.addedStock}
+                onChange={(e) => setFormData({ ...formData, addedStock: parseInt(e.target.value) || 0 })}
+                data-testid="input-added-stock"
               />
             </div>
 
@@ -179,27 +170,28 @@ export const AddRecordDialog = ({ products, selectedDate, onAdd }: AddRecordDial
                 id="sold"
                 type="number"
                 min="0"
-                value={formData.sold_stock}
-                onChange={(e) => setFormData({ ...formData, sold_stock: parseInt(e.target.value) || 0 })}
+                value={formData.soldStock}
+                onChange={(e) => setFormData({ ...formData, soldStock: parseInt(e.target.value) || 0 })}
+                data-testid="input-sold-stock"
               />
             </div>
           </div>
 
-          {formData.product_id && (
+          {formData.productId && (
             <div className="bg-muted p-3 rounded-lg text-sm">
               <div className="font-semibold mb-1">Preview:</div>
               <div className="text-muted-foreground">
-                Total Stock: {formData.opening_stock + formData.added_stock} |
-                Closing Stock: {(formData.opening_stock + formData.added_stock) - formData.sold_stock}
+                Total Stock: {formData.openingStock + formData.addedStock} |
+                Closing Stock: {(formData.openingStock + formData.addedStock) - formData.soldStock}
               </div>
             </div>
           )}
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} data-testid="button-cancel">
               Cancel
             </Button>
-            <Button type="submit" disabled={!formData.product_id}>
+            <Button type="submit" disabled={!formData.productId} data-testid="button-submit-record">
               Add Record
             </Button>
           </div>
