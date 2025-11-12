@@ -38,13 +38,15 @@ export const dailyRecordsRelations = relations(dailyRecords, ({ one }) => ({
   }),
 }));
 
-export const insertProductSchema = createInsertSchema(products).omit({
+const baseInsertProductSchema = createInsertSchema(products);
+export const insertProductSchema = baseInsertProductSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertDailyRecordSchema = createInsertSchema(dailyRecords)
+const baseInsertDailyRecordSchema = createInsertSchema(dailyRecords);
+export const insertDailyRecordSchema = baseInsertDailyRecordSchema
   .omit({
     id: true,
     closingStock: true,

@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { DailyRecordWithProduct } from "@/types/stock";
+import type { DailyRecordWithProduct } from "@shared/schema";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -42,29 +42,29 @@ export const DailyRecordTable = ({ records, onDelete }: DailyRecordTableProps) =
             </TableRow>
           ) : (
             records.map((record) => {
-              const totalStock = record.opening_stock + record.added_stock;
-              const isLowStock = record.closing_stock < 10;
+              const totalStock = record.openingStock + record.addedStock;
+              const isLowStock = record.closingStock < 10;
               
               return (
                 <TableRow key={record.id} className={isLowStock ? "bg-warning/10" : ""}>
                   <TableCell className="font-medium">
                     <div>
-                      <div className="text-foreground">{record.products.name}</div>
-                      <div className="text-xs text-muted-foreground">{record.products.category}</div>
+                      <div className="text-foreground">{record.product.name}</div>
+                      <div className="text-xs text-muted-foreground">{record.product.category}</div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-center">{record.opening_stock}</TableCell>
-                  <TableCell className="text-center">{record.added_stock}</TableCell>
+                  <TableCell className="text-center">{record.openingStock}</TableCell>
+                  <TableCell className="text-center">{record.addedStock}</TableCell>
                   <TableCell className="text-center font-semibold">{totalStock}</TableCell>
-                  <TableCell className="text-center">{record.sold_stock}</TableCell>
+                  <TableCell className="text-center">{record.soldStock}</TableCell>
                   <TableCell className="text-right font-semibold">
-                    ${Number(record.amount_sold).toFixed(2)}
+                    ${Number(record.amountSold).toFixed(2)}
                   </TableCell>
                   <TableCell className="text-center">
                     {isLowStock ? (
-                      <Badge variant="destructive">{record.closing_stock}</Badge>
+                      <Badge variant="destructive">{record.closingStock}</Badge>
                     ) : (
-                      <span className="font-semibold">{record.closing_stock}</span>
+                      <span className="font-semibold">{record.closingStock}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">

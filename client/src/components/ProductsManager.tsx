@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Product } from "@/types/stock";
+import type { Product, InsertProduct } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,8 +24,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ProductsManagerProps {
   products: Product[];
-  onAdd: (product: Omit<Product, "id" | "created_at" | "updated_at">) => void;
-  onUpdate: (id: string, product: Partial<Product>) => void;
+  onAdd: (product: InsertProduct) => void;
+  onUpdate: (id: string, product: Partial<InsertProduct>) => void;
   onDelete: (id: string) => void;
 }
 
@@ -36,14 +36,14 @@ export const ProductsManager = ({ products, onAdd, onUpdate, onDelete }: Product
   const [formData, setFormData] = useState({
     name: "",
     category: "",
-    cost_price: 0,
-    selling_price: 0,
+    costPrice: "0",
+    sellingPrice: "0",
   });
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     onAdd(formData);
-    setFormData({ name: "", category: "", cost_price: 0, selling_price: 0 });
+    setFormData({ name: "", category: "", costPrice: "0", sellingPrice: "0" });
     setAddOpen(false);
   };
 
@@ -61,8 +61,8 @@ export const ProductsManager = ({ products, onAdd, onUpdate, onDelete }: Product
     setFormData({
       name: product.name,
       category: product.category,
-      cost_price: product.cost_price,
-      selling_price: product.selling_price,
+      costPrice: product.costPrice,
+      sellingPrice: product.sellingPrice,
     });
     setEditOpen(true);
   };
@@ -114,9 +114,10 @@ export const ProductsManager = ({ products, onAdd, onUpdate, onDelete }: Product
                     type="number"
                     step="0.01"
                     min="0"
-                    value={formData.cost_price}
-                    onChange={(e) => setFormData({ ...formData, cost_price: parseFloat(e.target.value) || 0 })}
+                    value={formData.costPrice}
+                    onChange={(e) => setFormData({ ...formData, costPrice: e.target.value })}
                     required
+                    data-testid="input-cost-price"
                   />
                 </div>
                 <div className="space-y-2">
@@ -126,9 +127,10 @@ export const ProductsManager = ({ products, onAdd, onUpdate, onDelete }: Product
                     type="number"
                     step="0.01"
                     min="0"
-                    value={formData.selling_price}
-                    onChange={(e) => setFormData({ ...formData, selling_price: parseFloat(e.target.value) || 0 })}
+                    value={formData.sellingPrice}
+                    onChange={(e) => setFormData({ ...formData, sellingPrice: e.target.value })}
                     required
+                    data-testid="input-selling-price"
                   />
                 </div>
               </div>
@@ -157,13 +159,15 @@ export const ProductsManager = ({ products, onAdd, onUpdate, onDelete }: Product
             </TableHeader>
             <TableBody>
               {products.map((product) => {
-                const margin = ((product.selling_price - product.cost_price) / product.cost_price * 100).toFixed(1);
+                const costPrice = parseFloat(product.costPrice);
+                const sellingPrice = parseFloat(product.sellingPrice);
+                const margin = ((sellingPrice - costPrice) / costPrice * 100).toFixed(1);
                 return (
                   <TableRow key={product.id}>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>{product.category}</TableCell>
-                    <TableCell className="text-right">${product.cost_price.toFixed(2)}</TableCell>
-                    <TableCell className="text-right">${product.selling_price.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">${costPrice.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">${sellingPrice.toFixed(2)}</TableCell>
                     <TableCell className="text-right text-success font-semibold">{margin}%</TableCell>
                     <TableCell className="text-center">
                       <div className="flex justify-center gap-2">
@@ -228,9 +232,10 @@ export const ProductsManager = ({ products, onAdd, onUpdate, onDelete }: Product
                   type="number"
                   step="0.01"
                   min="0"
-                  value={formData.cost_price}
-                  onChange={(e) => setFormData({ ...formData, cost_price: parseFloat(e.target.value) || 0 })}
+                  value={formData.costPrice}
+                  onChange={(e) => setFormData({ ...formData, costPrice: e.target.value })}
                   required
+                  data-testid="input-edit-cost-price"
                 />
               </div>
               <div className="space-y-2">
@@ -240,8 +245,8 @@ export const ProductsManager = ({ products, onAdd, onUpdate, onDelete }: Product
                   type="number"
                   step="0.01"
                   min="0"
-                  value={formData.selling_price}
-                  onChange={(e) => setFormData({ ...formData, selling_price: parseFloat(e.target.value) || 0 })}
+                  value={formData.sellingPrice}
+                  onChange={(e) => setFormData({ ...formData, sellingPrice: e.target.value })}
                   required
                 />
               </div>

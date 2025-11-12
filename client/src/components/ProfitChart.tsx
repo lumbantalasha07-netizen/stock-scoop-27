@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DailyRecordWithProduct } from "@/types/stock";
+import type { DailyRecordWithProduct } from "@shared/schema";
 import { BarChart3 } from "lucide-react";
 
 interface ProfitChartProps {
@@ -52,7 +52,7 @@ export const ProfitChart = ({ records }: ProfitChartProps) => {
               <div key={record.id} className="space-y-1">
                 <div className="flex justify-between items-center text-sm">
                   <span className="font-medium text-foreground">
-                    {record.products.name}
+                    {record.product.name}
                   </span>
                   <span className="font-semibold text-success">
                     ${profit.toFixed(2)}
