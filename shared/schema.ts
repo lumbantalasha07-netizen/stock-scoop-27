@@ -38,27 +38,31 @@ export const dailyRecordsRelations = relations(dailyRecords, ({ one }) => ({
   }),
 }));
 
-const baseInsertProductSchema = createInsertSchema(products);
-export const insertProductSchema = baseInsertProductSchema.omit({
+export const insertProductSchema = createInsertSchema(products, {
+  name: z.string().min(1),
+  category: z.string().min(1),
+  costPrice: z.coerce.number().positive(),
+  sellingPrice: z.coerce.number().positive(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-const baseInsertDailyRecordSchema = createInsertSchema(dailyRecords);
-export const insertDailyRecordSchema = baseInsertDailyRecordSchema
-  .omit({
-    id: true,
-    closingStock: true,
-    amountSold: true,
-    profit: true,
-    createdAt: true,
-    updatedAt: true,
-  })
-  .extend({
-    productId: z.string().uuid(),
-    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  });
+export const insertDailyRecordSchema = createInsertSchema(dailyRecords, {
+  productId: z.string().uuid(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  openingStock: z.coerce.number().int().min(0),
+  addedStock: z.coerce.number().int().min(0),
+  soldStock: z.coerce.number().int().min(0),
+}).omit({
+  id: true,
+  closingStock: true,
+  amountSold: true,
+  profit: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
