@@ -14,13 +14,14 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ['Inter', 'Poppins', 'sans-serif'],
-        body: ['Roboto', 'Open Sans', 'sans-serif'],
-        mono: ['Roboto Mono', 'monospace'],
+        heading: ['Poppins', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
+        mono: ['Space Mono', 'monospace'],
       },
       boxShadow: {
-        'card': '0 2px 8px 0 rgba(0, 0, 0, 0.06)',
-        'card-hover': '0 4px 12px 0 rgba(0, 0, 0, 0.1)',
+        'card': '0 4px 12px -2px rgba(0, 0, 0, 0.08)',
+        'card-hover': '0 12px 24px -4px rgba(0, 0, 0, 0.12)',
+        'float': '0 8px 32px -4px rgba(0, 0, 0, 0.15)',
       },
       colors: {
         border: "hsl(var(--border))",
@@ -58,6 +59,8 @@ export default {
         },
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
+        positive: "hsl(var(--positive))",
+        negative: "hsl(var(--negative))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

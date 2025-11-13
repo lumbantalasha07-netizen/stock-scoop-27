@@ -97,15 +97,18 @@ export const AddRecordDialog = ({ products, selectedDate, onAdd }: AddRecordDial
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="shadow-lg hover:shadow-xl transition-shadow">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Record
+        <Button 
+          size="icon"
+          className="h-14 w-14 rounded-full shadow-float hover:shadow-float hover:scale-110 transition-all duration-300 bg-primary text-primary-foreground"
+          data-testid="button-add-record-fab"
+        >
+          <Plus className="h-6 w-6" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] rounded-2xl">
         <DialogHeader>
-          <DialogTitle>Add Daily Stock Record</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="font-heading">Add Daily Stock Record</DialogTitle>
+          <DialogDescription className="font-body">
             Opening stock will be auto-filled from yesterday's closing stock.
           </DialogDescription>
         </DialogHeader>
@@ -178,9 +181,9 @@ export const AddRecordDialog = ({ products, selectedDate, onAdd }: AddRecordDial
           </div>
 
           {formData.productId && (
-            <div className="bg-muted p-3 rounded-lg text-sm">
-              <div className="font-semibold mb-1">Preview:</div>
-              <div className="text-muted-foreground">
+            <div className="bg-muted/50 p-4 rounded-xl text-sm border border-border/50 font-body">
+              <div className="font-semibold mb-1 text-foreground">Preview:</div>
+              <div className="text-muted-foreground font-mono text-xs">
                 Total Stock: {formData.openingStock + formData.addedStock} |
                 Closing Stock: {(formData.openingStock + formData.addedStock) - formData.soldStock}
               </div>
@@ -188,10 +191,10 @@ export const AddRecordDialog = ({ products, selectedDate, onAdd }: AddRecordDial
           )}
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} data-testid="button-cancel">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-xl font-body" data-testid="button-cancel">
               Cancel
             </Button>
-            <Button type="submit" disabled={!formData.productId} data-testid="button-submit-record">
+            <Button type="submit" disabled={!formData.productId} className="rounded-xl font-body" data-testid="button-submit-record">
               Add Record
             </Button>
           </div>

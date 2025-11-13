@@ -1,53 +1,56 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@400;500&family=Open+Sans:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Premium Restaurant Back-Office Design System
-   Colors MUST be HSL format (H S% L%)
-   Light cream background (#F6F5F3), white cards, terracotta accent (#E35A3A), deep mint (#11826B)
+/* Warm Minimal Pro Design System
+   Modern, clean aesthetic inspired by Notion/Linear for restaurants
+   Colors: Off-white (#FAFAF8), Coral Orange (#FF6B3D), Muted Green (#6D9886)
+   Fonts: Poppins (headings), Inter (body), Space Mono (numbers)
 */
 
 @layer base {
   :root {
-    --background: 40 20% 96%;
-    --foreground: 0 0% 20%;
+    --background: 40 11% 98%;
+    --foreground: 0 0% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 20%;
+    --card-foreground: 0 0% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
+    --popover-foreground: 0 0% 15%;
 
-    --primary: 11 74% 56%;
+    --primary: 16 100% 62%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 20% 92%;
-    --secondary-foreground: 0 0% 20%;
+    --secondary: 154 21% 51%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 40 15% 90%;
+    --muted: 40 11% 94%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 11 74% 56%;
+    --accent: 16 100% 62%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 352 77% 50%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 15% 88%;
-    --input: 40 15% 88%;
-    --ring: 11 74% 56%;
+    --border: 40 11% 90%;
+    --input: 40 11% 90%;
+    --ring: 16 100% 62%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
     
-    --success: 164 82% 29%;
-    --warning: 45 100% 51%;
+    --success: 154 21% 51%;
+    --warning: 38 92% 50%;
+    --positive: 142 76% 36%;
+    --negative: 0 84% 60%;
     
-    --shadow-sm: 0 1px 2px 0 hsl(15 30% 30% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(15 30% 30% / 0.1);
-    --shadow-lg: 0 10px 15px -3px hsl(15 30% 30% / 0.1);
-    --shadow-glow: 0 0 20px hsl(15 75% 55% / 0.3);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.12);
+    --shadow-glow: 0 0 24px rgba(255, 107, 61, 0.2);
 
     --sidebar-background: 0 0% 98%;
 
@@ -67,41 +70,42 @@
   }
 
   .dark {
-    --background: 0 0% 12%;
-    --foreground: 40 20% 96%;
+    --background: 0 0% 10%;
+    --foreground: 0 0% 95%;
 
-    --card: 0 0% 16%;
-    --card-foreground: 40 20% 96%;
+    --card: 0 0% 14%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 16%;
-    --popover-foreground: 40 20% 96%;
+    --popover: 0 0% 14%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 11 74% 56%;
+    --primary: 16 100% 62%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 40 20% 96%;
+    --secondary: 154 21% 51%;
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 65%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 11 74% 56%;
+    --accent: 16 100% 62%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 352 77% 50%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 24%;
     --input: 0 0% 24%;
-    --ring: 11 74% 56%;
+    --ring: 16 100% 62%;
+    
     --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 11 74% 56%;
+    --sidebar-primary: 16 100% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 16%;
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 0 0% 16%;
-    --sidebar-ring: 11 74% 56%;
+    --sidebar-ring: 16 100% 62%;
   }
 }
 
