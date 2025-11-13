@@ -38,14 +38,35 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const storage = new MemStorage();
-  registerRoutes(app, storage);
+  try {
+    const storage = new MemStorage();
+    registerRoutes(app, storage);
 
-  const server = await import("http").then((http) => http.createServer(app));
-  await setupVite(app, server);
+    const server = await import("http").then((http) => http.createServer(app));
+    await setupVite(app, server);
 
-  const PORT = 5000;
-  server.listen(PORT, "0.0.0.0", () => {
-    log(`Server running on port ${PORT}`);
-  });
-})();
+    // Error-handling middleware (must be last)
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
+      
+      log(`Error: ${status} - ${message}`);
+      console.error(err.stack);
+      
+      res.status(status).json({ message });
+    });
+
+    const PORT = 5000;
+    server.listen(PORT, "0.0.0.0", () => {
+      log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Fatal error during server startup:");
+    console.error(error);
+    process.exit(1);
+  }
+})().catch((error) => {
+  console.error("Unhandled error in server initialization:");
+  console.error(error);
+  process.exit(1);
+});
