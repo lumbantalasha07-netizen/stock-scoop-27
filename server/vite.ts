@@ -36,6 +36,13 @@ export async function setupVite(app: Express, server: Server) {
       return next();
     }
 
+    // Let Vite handle asset requests (CSS, JS, images, etc.)
+    // Only serve HTML for navigation requests
+    const isAssetRequest = /\.(css|js|json|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/i.test(req.path);
+    if (isAssetRequest || req.path.includes('/@') || req.path.startsWith('/src/')) {
+      return next();
+    }
+
     const url = req.originalUrl;
 
     try {

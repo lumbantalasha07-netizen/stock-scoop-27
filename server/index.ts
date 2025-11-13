@@ -43,7 +43,13 @@ app.use((req, res, next) => {
     registerRoutes(app, storage);
 
     const server = await import("http").then((http) => http.createServer(app));
-    await setupVite(app, server);
+    
+    // Use Vite dev server in development, static files in production
+    if (process.env.NODE_ENV === "production") {
+      serveStatic(app);
+    } else {
+      await setupVite(app, server);
+    }
 
     // Error-handling middleware (must be last)
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
