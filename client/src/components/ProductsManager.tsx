@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { Product, InsertProduct } from "@shared/schema";
+import { insertProductSchema } from "@shared/schema";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,16 +13,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Pencil, Trash2, Plus } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Pencil, Trash2, Plus, Package2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
+type ProductFormState = z.input<typeof insertProductSchema>;
 
 interface ProductsManagerProps {
   products: Product[];
@@ -33,24 +29,26 @@ export const ProductsManager = ({ products, onAdd, onUpdate, onDelete }: Product
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProductFormState>({
     name: "",
     category: "",
-    costPrice: "0",
-    sellingPrice: "0",
+    costPrice: "",
+    sellingPrice: "",
   });
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    onAdd(formData);
-    setFormData({ name: "", category: "", costPrice: "0", sellingPrice: "0" });
+    const parsed = insertProductSchema.parse(formData);
+    onAdd(parsed);
+    setFormData({ name: "", category: "", costPrice: "", sellingPrice: "" });
     setAddOpen(false);
   };
 
   const handleEdit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingProduct) {
-      onUpdate(editingProduct.id, formData);
+      const parsed = insertProductSchema.parse(formData);
+      onUpdate(editingProduct.id, parsed);
       setEditOpen(false);
       setEditingProduct(null);
     }
@@ -70,45 +68,56 @@ export const ProductsManager = ({ products, onAdd, onUpdate, onDelete }: Product
   const categories = Array.from(new Set(products.map(p => p.category)));
 
   return (
-    <Card className="shadow-lg">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Products Management</CardTitle>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground font-heading">Products Catalog</h2>
+          <p className="text-muted-foreground font-body mt-1">
+            Manage your product inventory and pricing
+          </p>
+        </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger asChild>
-            <Button size="sm">
+            <Button size="default" className="font-body" data-testid="button-add-product">
               <Plus className="h-4 w-4 mr-2" />
               Add Product
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Add New Product</DialogTitle>
-              <DialogDescription>
-                Enter the details for the new product.
+              <DialogTitle className="font-heading text-xl">Add New Product</DialogTitle>
+              <DialogDescription className="font-body">
+                Enter the details for the new product in your catalog.
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleAdd} className="space-y-4 mt-4">
+            <form onSubmit={handleAdd} className="space-y-5 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Product Name</Label>
+                <Label htmlFor="name" className="font-body font-medium">Product Name</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g., Coca-Cola"
+                  className="font-body"
                   required
+                  data-testid="input-product-name"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
+                <Label htmlFor="category" className="font-body font-medium">Category</Label>
                 <Input
                   id="category"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  placeholder="e.g., Drinks, Snacks, Meat & Protein"
+                  className="font-body"
                   required
+                  data-testid="input-product-category"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="cost">Cost Price</Label>
+                  <Label htmlFor="cost" className="font-body font-medium">Cost Price ($)</Label>
                   <Input
                     id="cost"
                     type="number"
@@ -116,12 +125,14 @@ export const ProductsManager = ({ products, onAdd, onUpdate, onDelete }: Product
                     min="0"
                     value={formData.costPrice}
                     onChange={(e) => setFormData({ ...formData, costPrice: e.target.value })}
+                    placeholder="0.00"
+                    className="font-mono"
                     required
                     data-testid="input-cost-price"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="selling">Selling Price</Label>
+                  <Label htmlFor="selling" className="font-body font-medium">Selling Price ($)</Label>
                   <Input
                     id="selling"
                     type="number"
@@ -129,104 +140,153 @@ export const ProductsManager = ({ products, onAdd, onUpdate, onDelete }: Product
                     min="0"
                     value={formData.sellingPrice}
                     onChange={(e) => setFormData({ ...formData, sellingPrice: e.target.value })}
+                    placeholder="0.00"
+                    className="font-mono"
                     required
                     data-testid="input-selling-price"
                   />
                 </div>
               </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
+              <div className="flex justify-end gap-3 pt-2">
+                <Button type="button" variant="outline" onClick={() => setAddOpen(false)} className="font-body">
                   Cancel
                 </Button>
-                <Button type="submit">Add Product</Button>
+                <Button type="submit" className="font-body" data-testid="button-submit-product">Add Product</Button>
               </div>
             </form>
           </DialogContent>
         </Dialog>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-lg border border-border overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-secondary">
-                <TableHead className="font-semibold">Name</TableHead>
-                <TableHead className="font-semibold">Category</TableHead>
-                <TableHead className="text-right font-semibold">Cost Price</TableHead>
-                <TableHead className="text-right font-semibold">Selling Price</TableHead>
-                <TableHead className="text-right font-semibold">Margin</TableHead>
-                <TableHead className="text-center font-semibold">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => {
-                const costPrice = parseFloat(product.costPrice);
-                const sellingPrice = parseFloat(product.sellingPrice);
-                const margin = ((sellingPrice - costPrice) / costPrice * 100).toFixed(1);
-                return (
-                  <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell className="text-right">${costPrice.toFixed(2)}</TableCell>
-                    <TableCell className="text-right">${sellingPrice.toFixed(2)}</TableCell>
-                    <TableCell className="text-right text-success font-semibold">{margin}%</TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex justify-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openEditDialog(product)}
-                          className="hover:bg-primary/10"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onDelete(product.id)}
-                          className="hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+      </div>
+
+      {categories.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <Badge key={category} variant="secondary" className="font-body">
+              {category}
+            </Badge>
+          ))}
         </div>
-      </CardContent>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {products.length === 0 ? (
+          <div className="col-span-full bg-card rounded-xl shadow-card p-12 text-center border border-border">
+            <Package2 className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-foreground font-heading mb-2">No products yet</h3>
+            <p className="text-muted-foreground font-body mb-6">
+              Add your first product to start tracking inventory
+            </p>
+            <Button onClick={() => setAddOpen(true)} className="font-body">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Your First Product
+            </Button>
+          </div>
+        ) : (
+          products.map((product) => {
+            const costPrice = parseFloat(product.costPrice);
+            const sellingPrice = parseFloat(product.sellingPrice);
+            const profit = sellingPrice - costPrice;
+            const margin = ((profit / costPrice) * 100).toFixed(1);
+
+            return (
+              <div
+                key={product.id}
+                className="bg-card rounded-xl shadow-card hover:shadow-card-hover transition-all p-6 border border-border"
+                data-testid={`card-product-${product.id}`}
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-foreground font-heading mb-1">
+                      {product.name}
+                    </h3>
+                    <Badge variant="secondary" className="font-body text-xs">
+                      {product.category}
+                    </Badge>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openEditDialog(product)}
+                      className="h-8 w-8 hover:bg-primary/10"
+                      data-testid={`button-edit-${product.id}`}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDelete(product.id)}
+                      className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                      data-testid={`button-delete-${product.id}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground font-body">Cost</span>
+                    <span className="text-lg font-mono font-bold text-foreground">
+                      ${costPrice.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground font-body">Selling</span>
+                    <span className="text-lg font-mono font-bold text-primary">
+                      ${sellingPrice.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="pt-3 border-t border-border">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-muted-foreground font-body">Profit Margin</span>
+                      <span className="text-lg font-mono font-bold text-success">
+                        {margin}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Edit Product</DialogTitle>
-            <DialogDescription>
-              Update the product details.
+            <DialogTitle className="font-heading text-xl">Edit Product</DialogTitle>
+            <DialogDescription className="font-body">
+              Update the product details and pricing information.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleEdit} className="space-y-4 mt-4">
+          <form onSubmit={handleEdit} className="space-y-5 mt-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name">Product Name</Label>
+              <Label htmlFor="edit-name" className="font-body font-medium">Product Name</Label>
               <Input
                 id="edit-name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="font-body"
                 required
+                data-testid="input-edit-product-name"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-category">Category</Label>
+              <Label htmlFor="edit-category" className="font-body font-medium">Category</Label>
               <Input
                 id="edit-category"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="font-body"
                 required
+                data-testid="input-edit-category"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-cost">Cost Price</Label>
+                <Label htmlFor="edit-cost" className="font-body font-medium">Cost Price ($)</Label>
                 <Input
                   id="edit-cost"
                   type="number"
@@ -234,12 +294,13 @@ export const ProductsManager = ({ products, onAdd, onUpdate, onDelete }: Product
                   min="0"
                   value={formData.costPrice}
                   onChange={(e) => setFormData({ ...formData, costPrice: e.target.value })}
+                  className="font-mono"
                   required
                   data-testid="input-edit-cost-price"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-selling">Selling Price</Label>
+                <Label htmlFor="edit-selling" className="font-body font-medium">Selling Price ($)</Label>
                 <Input
                   id="edit-selling"
                   type="number"
@@ -247,19 +308,21 @@ export const ProductsManager = ({ products, onAdd, onUpdate, onDelete }: Product
                   min="0"
                   value={formData.sellingPrice}
                   onChange={(e) => setFormData({ ...formData, sellingPrice: e.target.value })}
+                  className="font-mono"
                   required
+                  data-testid="input-edit-selling-price"
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setEditOpen(false)}>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button type="button" variant="outline" onClick={() => setEditOpen(false)} className="font-body">
                 Cancel
               </Button>
-              <Button type="submit">Update Product</Button>
+              <Button type="submit" className="font-body" data-testid="button-update-product">Update Product</Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
-    </Card>
+    </div>
   );
 };

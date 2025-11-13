@@ -39,10 +39,14 @@ export const dailyRecordsRelations = relations(dailyRecords, ({ one }) => ({
 }));
 
 export const insertProductSchema = createInsertSchema(products, {
-  name: z.string().min(1),
-  category: z.string().min(1),
-  costPrice: z.coerce.number().positive(),
-  sellingPrice: z.coerce.number().positive(),
+  name: (schema) => schema.min(1),
+  category: (schema) => schema.min(1),
+  costPrice: (schema) => schema.refine((val) => /^\d+(\.\d{1,2})?$/.test(val) && parseFloat(val) > 0, {
+    message: "Cost price must be a positive decimal number"
+  }),
+  sellingPrice: (schema) => schema.refine((val) => /^\d+(\.\d{1,2})?$/.test(val) && parseFloat(val) > 0, {
+    message: "Selling price must be a positive decimal number"
+  }),
 }).omit({
   id: true,
   createdAt: true,
@@ -50,11 +54,17 @@ export const insertProductSchema = createInsertSchema(products, {
 });
 
 export const insertDailyRecordSchema = createInsertSchema(dailyRecords, {
-  productId: z.string().uuid(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  openingStock: z.coerce.number().int().min(0),
-  addedStock: z.coerce.number().int().min(0),
-  soldStock: z.coerce.number().int().min(0),
+  productId: (schema) => schema,
+  date: (schema) => schema.regex(/^\d{4}-\d{2}-\d{2}$/),
+  openingStock: (schema) => schema.refine((val) => /^\d+$/.test(val) && parseInt(val) >= 0, {
+    message: "Opening stock must be a non-negative integer"
+  }),
+  addedStock: (schema) => schema.refine((val) => /^\d+$/.test(val) && parseInt(val) >= 0, {
+    message: "Added stock must be a non-negative integer"
+  }),
+  soldStock: (schema) => schema.refine((val) => /^\d+$/.test(val) && parseInt(val) >= 0, {
+    message: "Sold stock must be a non-negative integer"
+  }),
 }).omit({
   id: true,
   closingStock: true,

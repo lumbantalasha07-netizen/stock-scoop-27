@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import type { DailyRecordWithProduct } from "@shared/schema";
-import { Trash2 } from "lucide-react";
+import { Trash2, AlertTriangle, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DailyRecordTableProps {
@@ -18,57 +18,71 @@ interface DailyRecordTableProps {
 
 export const DailyRecordTable = ({ records, onDelete }: DailyRecordTableProps) => {
   return (
-    <div className="rounded-lg border border-border overflow-hidden shadow-md">
+    <div className="overflow-auto">
       <Table>
         <TableHeader>
-          <TableRow className="bg-secondary">
-            <TableHead className="font-semibold">Item Name</TableHead>
-            <TableHead className="text-center font-semibold">Opening</TableHead>
-            <TableHead className="text-center font-semibold">Added</TableHead>
-            <TableHead className="text-center font-semibold">Total</TableHead>
-            <TableHead className="text-center font-semibold">Sold</TableHead>
-            <TableHead className="text-right font-semibold">Amount Sold</TableHead>
-            <TableHead className="text-center font-semibold">Closing</TableHead>
-            <TableHead className="text-right font-semibold">Profit</TableHead>
-            <TableHead className="text-center font-semibold">Action</TableHead>
+          <TableRow className="bg-muted/50 hover:bg-muted/50">
+            <TableHead className="font-bold font-heading text-foreground">Item Name</TableHead>
+            <TableHead className="text-center font-bold font-heading text-foreground">Opening</TableHead>
+            <TableHead className="text-center font-bold font-heading text-foreground">Added</TableHead>
+            <TableHead className="text-center font-bold font-heading text-foreground">Total</TableHead>
+            <TableHead className="text-center font-bold font-heading text-foreground">Sold</TableHead>
+            <TableHead className="text-right font-bold font-heading text-foreground">Amount Sold</TableHead>
+            <TableHead className="text-center font-bold font-heading text-foreground">Closing</TableHead>
+            <TableHead className="text-right font-bold font-heading text-foreground">Profit</TableHead>
+            <TableHead className="text-center font-bold font-heading text-foreground">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {records.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
-                No records for this date. Add a new record to get started.
+            <TableRow className="hover:bg-transparent">
+              <TableCell colSpan={9} className="text-center text-muted-foreground py-16 font-body">
+                <div className="flex flex-col items-center gap-3">
+                  <Package className="h-12 w-12 text-muted-foreground/50" />
+                  <p className="text-lg">No records for this date</p>
+                  <p className="text-sm">Add a new record to get started</p>
+                </div>
               </TableCell>
             </TableRow>
           ) : (
             records.map((record) => {
               const totalStock = record.openingStock + record.addedStock;
               const isLowStock = record.closingStock < 10;
+              const hasProfit = Number(record.profit) > 0;
               
               return (
-                <TableRow key={record.id} className={isLowStock ? "bg-warning/10" : ""}>
+                <TableRow 
+                  key={record.id} 
+                  className={`${isLowStock ? "bg-warning/5 border-l-4 border-warning" : ""} hover:bg-muted/30 transition-colors`}
+                  data-testid={`row-record-${record.id}`}
+                >
                   <TableCell className="font-medium">
-                    <div>
-                      <div className="text-foreground">{record.product.name}</div>
-                      <div className="text-xs text-muted-foreground">{record.product.category}</div>
+                    <div className="flex items-center gap-2">
+                      {isLowStock && <AlertTriangle className="h-4 w-4 text-warning" />}
+                      <div>
+                        <div className="text-foreground font-body font-medium">{record.product.name}</div>
+                        <div className="text-sm text-muted-foreground font-body">{record.product.category}</div>
+                      </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-center">{record.openingStock}</TableCell>
-                  <TableCell className="text-center">{record.addedStock}</TableCell>
-                  <TableCell className="text-center font-semibold">{totalStock}</TableCell>
-                  <TableCell className="text-center">{record.soldStock}</TableCell>
-                  <TableCell className="text-right font-semibold">
+                  <TableCell className="text-center font-mono text-muted-foreground">{record.openingStock}</TableCell>
+                  <TableCell className="text-center font-mono text-foreground font-medium">{record.addedStock}</TableCell>
+                  <TableCell className="text-center font-mono text-foreground font-bold">{totalStock}</TableCell>
+                  <TableCell className="text-center font-mono text-foreground font-medium">{record.soldStock}</TableCell>
+                  <TableCell className="text-right font-mono text-foreground font-bold">
                     ${Number(record.amountSold).toFixed(2)}
                   </TableCell>
                   <TableCell className="text-center">
                     {isLowStock ? (
-                      <Badge variant="destructive">{record.closingStock}</Badge>
+                      <Badge variant="destructive" className="font-mono font-bold">
+                        {record.closingStock}
+                      </Badge>
                     ) : (
-                      <span className="font-semibold">{record.closingStock}</span>
+                      <span className="font-mono font-bold text-foreground">{record.closingStock}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <span className={Number(record.profit) > 0 ? "text-success font-semibold" : ""}>
+                    <span className={`font-mono font-bold ${hasProfit ? "text-success" : "text-muted-foreground"}`}>
                       ${Number(record.profit).toFixed(2)}
                     </span>
                   </TableCell>
@@ -77,7 +91,8 @@ export const DailyRecordTable = ({ records, onDelete }: DailyRecordTableProps) =
                       variant="ghost"
                       size="sm"
                       onClick={() => onDelete(record.id)}
-                      className="hover:bg-destructive/10 hover:text-destructive"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      data-testid={`button-delete-${record.id}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
