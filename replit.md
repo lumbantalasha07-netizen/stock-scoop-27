@@ -2,13 +2,31 @@
 
 ## Overview
 
-This is a full-stack restaurant inventory management application built with React, TypeScript, Express, and Vite. The system enables restaurant owners to track daily stock levels, record sales, calculate profits, and manage product inventory. It features a modern UI built with shadcn/ui components and Tailwind CSS, providing an intuitive interface for daily stock operations.
+This is a full-stack restaurant inventory management application built with React, TypeScript, Express, and Vite. **Recently migrated from Lovable (frontend-only with direct Supabase access) to Replit's fullstack template with Express backend and API-based architecture.** The system enables restaurant owners to track daily stock levels, record sales, calculate profits, and manage product inventory. It features a modern UI built with shadcn/ui components and Tailwind CSS, providing an intuitive interface for daily stock operations.
 
 The application allows users to maintain a product catalog with pricing information, create daily inventory records tracking opening/closing stock levels, and automatically calculate profits based on cost and selling prices. It includes visual analytics through profit charts and summary statistics cards.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## Recent Migration (November 2025)
+
+**Status**: Migration from Lovable to Replit fullstack template completed with server stability issue being investigated.
+
+**Completed Work**:
+- ✅ Created fullstack directory structure (client/, server/, shared/)
+- ✅ Implemented Drizzle schemas matching original Supabase tables
+- ✅ Created MemStorage for development (can be swapped to Postgres)
+- ✅ Built Express API with routes for products and daily records
+- ✅ Migrated all components to use API calls instead of Supabase client
+- ✅ Updated routing from react-router-dom to wouter
+- ✅ Fixed all TypeScript compilation errors
+- ✅ Fixed Express 5 compatibility issues (changed wildcard routes to use `app.use()`)
+- ✅ Added `allowedHosts: true` to vite.config.ts for Replit iframe support
+
+**Known Issue**:
+Server starts successfully (logs show "Server running on port 5000") and Vite connects, but then the server process crashes/resets shortly after. Browser console shows `[vite] server connection lost`. This appears to be a runtime crash occurring after initial startup. Investigation ongoing.
 
 ## System Architecture
 
