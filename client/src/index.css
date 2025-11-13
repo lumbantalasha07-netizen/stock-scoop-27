@@ -1,45 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@400;500&family=Open+Sans:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Premium Restaurant Back-Office Design System
+   Colors MUST be HSL format (H S% L%)
+   Light cream background (#F6F5F3), white cards, terracotta accent (#E35A3A), deep mint (#11826B)
 */
 
 @layer base {
   :root {
-    --background: 35 50% 96%;
-    --foreground: 20 14% 20%;
+    --background: 40 20% 96%;
+    --foreground: 0 0% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 20 14% 20%;
+    --card-foreground: 0 0% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 20 14% 20%;
+    --popover-foreground: 0 0% 20%;
 
-    --primary: 15 75% 55%;
+    --primary: 11 74% 56%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 60% 88%;
-    --secondary-foreground: 20 14% 20%;
+    --secondary: 40 20% 92%;
+    --secondary-foreground: 0 0% 20%;
 
-    --muted: 30 40% 92%;
-    --muted-foreground: 20 10% 45%;
+    --muted: 40 15% 90%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 25 80% 60%;
+    --accent: 11 74% 56%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 352 77% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 30 30% 88%;
-    --input: 30 30% 88%;
-    --ring: 15 75% 55%;
+    --border: 40 15% 88%;
+    --input: 40 15% 88%;
+    --ring: 11 74% 56%;
 
     --radius: 0.75rem;
     
-    --success: 142 71% 45%;
-    --warning: 38 92% 50%;
+    --success: 164 82% 29%;
+    --warning: 45 100% 51%;
     
     --shadow-sm: 0 1px 2px 0 hsl(15 30% 30% / 0.05);
     --shadow-md: 0 4px 6px -1px hsl(15 30% 30% / 0.1);
@@ -64,41 +67,41 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 20 14% 12%;
-    --foreground: 35 50% 96%;
+    --background: 0 0% 12%;
+    --foreground: 40 20% 96%;
 
-    --card: 20 14% 16%;
-    --card-foreground: 35 50% 96%;
+    --card: 0 0% 16%;
+    --card-foreground: 40 20% 96%;
 
-    --popover: 20 14% 16%;
-    --popover-foreground: 35 50% 96%;
+    --popover: 0 0% 16%;
+    --popover-foreground: 40 20% 96%;
 
-    --primary: 15 75% 55%;
+    --primary: 11 74% 56%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 20 14% 20%;
-    --secondary-foreground: 35 50% 96%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 40 20% 96%;
 
-    --muted: 20 14% 20%;
-    --muted-foreground: 35 20% 70%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 25 80% 60%;
+    --accent: 11 74% 56%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62% 50%;
+    --destructive: 352 77% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 20 14% 24%;
-    --input: 20 14% 24%;
-    --ring: 15 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --border: 0 0% 24%;
+    --input: 0 0% 24%;
+    --ring: 11 74% 56%;
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 11 74% 56%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 0 0% 16%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 16%;
+    --sidebar-ring: 11 74% 56%;
   }
 }
 
